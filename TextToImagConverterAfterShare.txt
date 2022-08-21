@@ -1,0 +1,46 @@
+//Convert text to image after share 
+
+
+ holder.save.setOnClickListener(v -> {
+           share(holder.jk);
+       });
+    }
+
+    private void share(LinearLayout layout) {
+
+        Bitmap bitmap= getBitmapFromView(layout);
+
+        File file = new File(context.getExternalCacheDir(),"item_background.png");
+        try {
+            FileOutputStream fout = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG,100,fout);
+            fout.flush();
+            fout.close();
+            file.setReadable(true,false);
+
+            Intent intent =new Intent(Intent.ACTION_SEND);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            intent.setType("image/png");
+            context.startActivity(Intent.createChooser(intent,"Share BY..."));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressLint("ResourceAsColor")
+    private Bitmap getBitmapFromView(View view){
+    Bitmap returnedBitmap=Bitmap.createBitmap(view.getWidth(),500,Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        Drawable bgDrawable=view.getBackground();
+        if (bgDrawable !=null) {
+            bgDrawable.draw(canvas);
+        }else {
+            canvas.drawColor(android.R.color.white);
+        }
+        view.draw(canvas);
+        return returnedBitmap;
+    }
